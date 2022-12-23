@@ -55,3 +55,38 @@ def mean_removal(input_data, axis=1):
             input_rows[index] = (input_rows[index] - inp_mean) / inp_std
         output = np.concatenate(input_rows, axis=0)
         return output
+    else:
+        raise ValueError("Axis must be 1 or 0")
+
+
+def min_max_scaler(input_data, axis=1):
+    """
+    Scales a numpy array to the minimum and maximum values.
+
+    Args:
+        input_data (np.array): The array to normalize
+        axis=1 (int): 0 for row-wise normalization, 1 for column-wise norm
+
+    Returns:
+        (np.array): Normalized matrix
+    """
+    if axis == 1:
+        input_columns = np.split(input_data, input_data.shape[1], axis=axis)
+        for index in range(len(input_columns)):
+            col_max = input_columns[index].max()
+            col_min = input_columns[index].min()
+            input_columns[index] = (input_columns[index] - col_min) \
+                / (col_max - col_min)
+        output = np.concatenate(input_columns, axis=1)
+        return output
+    elif axis == 0:
+        input_rows = np.split(input_data, input_data.shape[0], axis=axis)
+        for index in range(len(input_rows)):
+            row_max = input_rows[index].max()
+            row_min = input_rows[index].min()
+            input_rows[index] = (input_rows[index] - row_min) \
+                / (row_max - row_min)
+        output = np.concatenate(input_rows, axis=0)
+        return output
+    else:
+        raise ValueError("Axis must be 1 or 0")

@@ -17,6 +17,9 @@ sys.path.insert(0,
                 os.path.abspath(os.path.join(os.path.dirname(__file__),'..', '..')))
 from src.preprocessing.preprocessing_base import binarizer
 from src.preprocessing.preprocessing_base import mean_removal
+from src.preprocessing.preprocessing_base import min_max_scaler
+from src.preprocessing.preprocessing_base import \
+    least_absolute_deviation_norm
 
 
 class TestBinarizer:
@@ -65,6 +68,14 @@ class TestMeanRemoval:
                                 rtol=1e-04,
                                 err_msg="Std not normalized.")
 
+    def test_mean_removal_axis_value_error(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        with pytest.raises(ValueError):
+            mean_removal(input_data, axis=2)
+
     def test_mean_removal_array(self):
         input_data = np.array([[5.1, -2.9, 3.3],
                                [-1.2, 7.8, -6.1],
@@ -109,3 +120,117 @@ class TestMeanRemoval:
                                 expected,
                                 rtol=1e-07,
                                 err_msg="Actual and expected values vary.")
+
+
+class TestMinMaxScaler:
+    def test_min_max_scaler_shape(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        actual = min_max_scaler(input_data, axis=0)
+        act_shape = actual.shape
+        exp_shape = input_data.shape
+        assert act_shape == exp_shape, "Input and Output arrays don't match"
+
+    def test_min_max_axis(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        with pytest.raises(ValueError):
+            min_max_scaler(input_data, axis=2)
+
+    def test_min_max_scaler_ax1(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        actual = min_max_scaler(input_data, axis=1)
+        expected = np.array([[0.74117647, 0.39548023, 1.],
+                             [0., 1., 0.],
+                             [0.6, 0.5819209, 0.87234043],
+                             [1., 0., 0.17021277]])
+        np_test.assert_allclose(actual,
+                                expected,
+                                rtol=1e-05,
+                                err_msg="Output does not \
+                                         match expectations.")
+
+    def test_min_max_scaler_ax0(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        actual = min_max_scaler(input_data, axis=0)
+        expected = np.array([[1.0, 0., 0.775],
+                             [0.35251799, 1., 0.],
+                             [1.0, 0., 0.48571429],
+                             [1., 0., 0.31395349]])
+        np_test.assert_allclose(actual,
+                                expected,
+                                rtol=1e-05,
+                                err_msg="Output does not \
+                                         match expectations.")
+
+
+class TestLeastAbsoluteDeviationNorm:
+    def test_least_absolute_dev_shape_ax0(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        actual = least_absolute_deviation_norm(input_data, axis=0)
+        act_shape = actual.shape
+        expected_shape = (4, 3)
+        assert act_shape == expected_shape, \
+            "Input and output shape don't match"
+
+    def test_least_absolute_dev_shape_ax1(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        actual = least_absolute_deviation_norm(input_data, axis=1)
+        act_shape = actual.shape
+        expected_shape = (4, 3)
+        assert act_shape == expected_shape, \
+            "Input and output shape don't match"
+
+    def test_least_absolute_dev_axis_valerr(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        with pytest.raises(ValueError):
+            least_absolute_deviation_norm(input_data, axis=3)
+
+    def test_least_absolute_dev_values_ax0(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        actual = least_absolute_deviation_norm(input_data, axis=0)
+        expected = np.array([[0.45132743, -0.25663717, 0.2920354],
+                            [-0.0794702, 0.51655629, -0.40397351],
+                            [0.609375, 0.0625, 0.328125],
+                            [0.33640553, -0.4562212, -0.20737327]])
+        np_test.assert_allclose(actual,
+                                expected,
+                                rtol=1e-05,
+                                err_msg="Actual and expected do not match.")
+
+    def test_least_absolute_dev_values_ax1(self):
+        input_data = input_data = np.array([[5.1, -2.9, 3.3],
+                                           [-1.2, 7.8, -6.1],
+                                           [3.9, 0.4, 2.1],
+                                           [7.3, -9.9, -4.5]])
+        actual = least_absolute_deviation_norm(input_data, axis=1)
+        expected = np.array([[0.29142857, -0.13809524, 0.20625],
+                            [-0.06857143, 0.37142857, -0.38125],
+                            [0.22285714, 0.01904762, 0.13125],
+                            [0.41714286, -0.47142857, -0.28125]])
+        np_test.assert_allclose(actual,
+                                expected,
+                                rtol=1e-05,
+                                err_msg="Actual and expected do not match.")
