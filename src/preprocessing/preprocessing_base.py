@@ -90,3 +90,63 @@ def min_max_scaler(input_data, axis=1):
         return output
     else:
         raise ValueError("Axis must be 1 or 0")
+
+
+def least_absolute_deviation_norm(input_data, axis=1):
+    """
+    Normalizes a numpy matrix so that the sum of the absolute value of
+    all rows or columns is equal to 1.
+
+    Args:
+        input_data: Numpy matrix to normalize
+        axis: 0 to normalize by rows or 1 to normalized by columns
+
+    Returns:
+        Numpy matrix with normalized values.
+    """
+    if axis == 1:
+        input_columns = np.split(input_data, input_data.shape[1], axis=axis)
+        for index in range(len(input_columns)):
+            col_sum = sum(abs(input_columns[index]))
+            input_columns[index] = input_columns[index] / col_sum
+        output = np.concatenate(input_columns, axis=1)
+        return output
+    elif axis == 0:
+        input_rows = np.split(input_data, input_data.shape[0], axis=axis)
+        for index in range(len(input_rows)):
+            row_sum = abs(input_rows[index]).sum()
+            input_rows[index] = input_rows[index] / row_sum
+        output = np.concatenate(input_rows, axis=0)
+        return output
+    else:
+        raise ValueError("Axis must be 1 or 0")
+
+
+def least_squares_deviation_norm(input_data, axis=1):
+    """
+    Normalizes a numpy matrix so that the sum of the squares of
+    all rows or columns is equal to 1.
+
+    Args:
+        input_data: Numpy matrix to normalize
+        axis: 0 to normalize by rows or 1 to normalized by columns
+
+    Returns:
+        Numpy matrix with normalized values.
+    """
+    if axis == 1:
+        input_columns = np.split(input_data, input_data.shape[1], axis=axis)
+        for index in range(len(input_columns)):
+            col_sum = sum((input_columns[index]) ** 2) ** 0.5
+            input_columns[index] = input_columns[index] / col_sum
+        output = np.concatenate(input_columns, axis=1)
+        return output
+    elif axis == 0:
+        input_rows = np.split(input_data, input_data.shape[0], axis=axis)
+        for index in range(len(input_rows)):
+            row_sum = (input_rows[index] ** 2).sum() ** 0.5
+            input_rows[index] = input_rows[index] / row_sum
+        output = np.concatenate(input_rows, axis=0)
+        return output
+    else:
+        raise ValueError("Axis must be 1 or 0")
