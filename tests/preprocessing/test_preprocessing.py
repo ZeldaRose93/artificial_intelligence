@@ -22,6 +22,7 @@ from src.preprocessing.preprocessing_base import \
     least_absolute_deviation_norm
 from src.preprocessing.preprocessing_base import \
     least_squares_deviation_norm
+from src.preprocessing.preprocessing_base import Encoder
 
 
 class TestBinarizer:
@@ -298,3 +299,32 @@ class TestLeastSquaresDeviationNorm:
                                 expected,
                                 rtol=1e-05,
                                 err_msg="Actual and expected do not match.")
+
+
+class TestEncoder:
+    def test_transform(self):
+        encoder = Encoder()
+        test_list = ['apple', 'apple', 'banana', 'cherry', 'apple', 'grape']
+        encoder.fit(test_list)
+        actual = encoder.transform(test_list)
+        expected = [0, 0, 1, 2, 0, 3]
+        np_test.assert_array_equal(actual,
+                                   expected,
+                                   err_msg="Actual values do not match \
+                                       expected values.\n Actual: \n \
+                                       {}\n Expected:\n {} ".format(actual,
+                                                                    expected))
+
+    def test_inverse_transform(self):
+        encoder = Encoder()
+        test_list = ['apple', 'apple', 'banana', 'cherry', 'apple', 'grape']
+        encoder.fit(test_list)
+        test_numbers = [0, 1, 2, 3]
+        actual = encoder.inverse_transform(test_numbers)
+        expected = ['apple', 'banana', 'cherry', 'grape']
+        np_test.assert_array_equal(actual,
+                                   expected,
+                                   err_msg="Actual values do not match \
+                                       expected values.\n Actual: \n \
+                                       {}\n Expected:\n {} ".format(actual,
+                                                                    expected))

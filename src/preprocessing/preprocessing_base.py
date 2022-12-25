@@ -150,3 +150,48 @@ def least_squares_deviation_norm(input_data, axis=1):
         return output
     else:
         raise ValueError("Axis must be 1 or 0")
+
+
+class Encoder:
+    def fit(self, target: np.array):
+        """
+        Builds dictionaries for transform and inverse_transform.
+
+        Args:
+            target: list or np.array with labels to encode
+
+        Returns:
+            copy of the encoder.
+        """
+        self.classes_ = np.unique(target)
+        self._encoder_dict = {label: index for index, label in
+                              enumerate(self.classes_)}
+        self._rev_encoder_dict = {index: label for index, label in
+                                  enumerate(self.classes_)}
+        return self
+
+    def transform(self, target: np.array):
+        """
+        Convert a vector from labels to encoded values.
+
+        Args:
+            target: the list of labels to convert
+
+        Returns:
+            Encoded np.array of encoded values.
+        """
+        coded_vector = [self._encoder_dict[x] for x in target]
+        return coded_vector
+
+    def inverse_transform(self, target):
+        """
+        Transforms encoded values back into their labels
+
+        Args:
+            target: The list of encoded labels to convert
+
+        Returns:
+            list of labels
+        """
+        coded_vector = [self._rev_encoder_dict[x] for x in target]
+        return coded_vector
