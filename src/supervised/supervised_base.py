@@ -16,33 +16,59 @@ from src.preprocessing.preprocessing_base import min_max_scaler
 
 class LogisticRegression:
     def __init__(self):
-        self.weights = np.ones([0])
+        self.weights = np.zeros([0])
+        self.bias = 0
+
+    def linear_transform(self, input_parameters: np.array):
+        return (input_parameters @ self.weights) + self.bias
 
     def logistic_equation(self,
-                          input_parameters: np.array
-                          ):
-        return 1 / (1 + np.exp(-(input_parameters @ self.weights)))
+                          input_parameters: np.array):
+        return (1 / (1 + np.exp(-(self.linear_transform(input_parameters)))))
 
+    def _gradient_descent(self,
+                          input_parameters: np.array,
+                          labels: np.array,
+                          tuning_parameter: float = 0.01):
+        h_x = self.logistic_equation(input_parameters)
+        h_x_minus_y = h_x - labels
+
+        final_matrix = input_parameters
+        for index in range(final_matrix.shape[0]):
+            final_matrix[index, :] = h_x_minus_y[index] \
+                * final_matrix[index, :]
+
+        final_matrix *= tuning_parameter
+        alpha_sums = final_matrix.sum(axis=0)
+
+        for index in range(len(self.weights)):
+            self.weights[index] -= alpha_sums[index]
+        return self.weights
+
+    # TODO: rebuild using the _gradient_descent function.
     def fit(self,
             input_parameters: np.array,
             labels: np.array,
             iteration_cap: int = 100000,  # Not yet implemented
             alpha_init: float = 0.05):
+
         # Verify labels are either 1 or 0
         if set(labels) | set([0, 1]) == set([0, 1]):
             pass
         else:
             raise ValueError("The set of labels must only contain 0 and 1.")
+
         # Coerce labels into a numpy array in the event they are passed in as a
         # list.
         labels = np.array(labels)
-        # Set initial weights
         self.input_parameters = input_parameters
-        self.weights = np.ones(input_parameters.shape[1])  # initialize weights
+        # initialize weights
+        self.weights = np.zeros(input_parameters.shape[1])
 
         # Initialize overall cost list.
         cost_list = []
         cost_delta = 10  # dummy value
+
         # Begin loop to train our models weights.
         iteration = 0
         # while (cost_delta > 1e-10) or not (cost_delta < 0):
@@ -72,52 +98,33 @@ class LogisticRegression:
         self.cost_list = cost_list
 
 
+# iris = datasets.load_iris()
+# iris
+# x = iris['data'][:, 2:]
+# y = iris['target']
+# y[y == 2] = 1
+# y
+# x = min_max_scaler(x, axis=1)
 
 
+# iris_class = LogisticRegression()
+# iris_class.fit(x, y, alpha_init=0.3, iteration_cap=10000)
+# len(iris_class.cost_list)
 
+# plt.scatter(range(len(iris_class.cost_list)), iris_class.cost_list)
+# plt.show()
 
-# This is to help train the dataset.
-input_data = np.array([[5.1, -2.9, 3.3],
-                       [-1.2, 7.8, -6.1],
-                       [3.9, 0.4, 2.1],
-                       [7.3, -9.9, -4.5]])
+# pred_match = []
+# for i in range(len(y)):
+#     if y[i] == iris_class.predictions[i]:
+#         pred_match.append(1)
+#     else:
+#         pred_match.append(0)
+# color = ['red' if x == 1 else 'blue' for x in y]
+# color_match = ['red' if x == 1 else 'blue' for x in pred_match]
 
+# plt.scatter(x[:, 0], x[:, 1], color=color)
+# plt.scatter(x[:, 0], x[:, 1], color=color_match)
 
-## Test the class
-test = LogisticRegression()
-test.fit(input_parameters=input_data, labels=[1, 1, 1, 0], alpha_init=0.05)
-test.weights
-len(test.cost_list)
-
-equation_results = test.logistic_equation(input_data)
-for value in equation_results:
-    print(f"{value:.7f}")
-
-
-iris = datasets.load_iris()
-iris
-x = iris['data'][:, 2:]
-y = iris['target']
-y[y == 2] = 1
-y
-x = min_max_scaler(x, axis=1)
-
-
-iris_class = LogisticRegression()
-iris_class.fit(x, y, alpha_init=0.3, iteration_cap=10000)
-len(iris_class.cost_list)
-
-plt.scatter(range(len(iris_class.cost_list)), iris_class.cost_list)
-plt.show()
-
-pred_match = []
-for i in range(len(y)):
-    if y[i] == iris_class.predictions[i]:
-        pred_match.append(1)
-    else:
-        pred_match.append(0)
-color = ['red' if x == 1 else 'blue' for x in y]
-color_match = ['red' if x == 1 else 'blue' for x in pred_match]
-
-plt.scatter(x[:, 0], x[:, 1], color=color)
-plt.scatter(x[:, 0], x[:, 1], color=color_match)
+if __name__ == '__main__':
+    pass
